@@ -213,10 +213,10 @@ class twelete:
                 if self.get_query("Filter based on media contents (Y/N):"):
                         while True:
                                 response = self.get_string("delete tweets WITH media or delete tweets WITHOUT media? (WITH/WITHOUT)\n", True)
-                                if response.lower() in ("with"):
+                                if response.lower() == "with":
                                         self.set_media_filter(True)
                                         break
-                                elif response.lower() in ("without"):
+                                elif response.lower() == "without":
                                         self.set_media_filter(False)
                                         break
 
