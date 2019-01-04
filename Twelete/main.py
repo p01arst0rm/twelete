@@ -427,8 +427,6 @@ class twelete:
                 for file_name in self.file_list:
                         data = self.read_file(file_name)
                         for tweet in data:
-                                print(self.phrase_list_black)
-                                print(self.phrase_list_white)
                                 if self.check_date(tweet):
                                         continue
                                 if self.fetch_status(tweet):
