@@ -1,19 +1,21 @@
 import Twelete
 
-api_key="XXXXXXXXXXXXXXXXXXx"
-api_key_secret="XXXXXXXXXXXXXXXXXXx"
+api_key="XXXXXXXXXXXXXXXXXXXXXXX"
+api_key_secret="XXXXXXXXXXXXXXXXXXXXXXX"
 
-access_token="XXXXXXXXXXXXXXXXXXx-XXXXXXXXXXXXXXXXXXx"
-access_token_secret="XXXXXXXXXXXXXXXXXXx"
+access_token="XXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXX"
+access_token_secret="XXXXXXXXXXXXXXXXXXXXXXX"
 
-archive_dir ="/path/to/archive"
+archive_dir ="/path/to/archive.zip"
 date_min="2016-01-24"
 date_max="2019"
 
 rt_min=-1
 likes_min=-1
 
-word_list= [" test "," me "]
+twitter_username = "dril"
+whitelist= [" save "," me "]
+blacklist= [" kill "," me "]
 
 def main():
     app = Twelete.twelete()
@@ -26,7 +28,9 @@ def main():
     #app.set_media_filter(True)
     #app.set_date_filter(date_min, date_max)
     #app.set_activity_filter(rt_min, likes_min)
-    #app.set_phrase_filter(word_list)
+    #app.set_keybase_twitter(twitter_username)
+    #app.set_phrase_whitelist_filter(whitelist)
+    #app.set_phrase_blacklist_filter(blacklist)
     app.delete_tweets()
     
 if __name__ == '__main__':main()

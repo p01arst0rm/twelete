@@ -12,13 +12,16 @@ class twelete:
 
         # private variables
         #----------------------------------------------------------------------------
-        filter_date = False
-        filter_activity = False
-        filter_phrase = False
-        filter_media = False
-        
         api_key_set = False
         access_token_set = False
+        
+        filter_date = False
+        filter_activity = False
+        filter_media = False
+        
+        filter_phrase_black = False
+        filter_phrase_white = False
+
         
         # variable selection
         # ---------------------------------------------------------------------------           
@@ -38,17 +41,31 @@ class twelete:
                 self.date_max=dateutil.parser.parse(str(y + " 00:00:00 +0000"))
 
         def set_activity_filter(self, x, y):
-                self.filter_activity = True
+                twelete.filter_activity = True
                 self.rt_min=x
                 self.like_min=y
-
-        def set_phrase_filter(self, x):
-                twelete.filter_phrase = True
-                self.phrase_check = x
                 
         def set_media_filter(self, x):
                 twelete.filter_media = True
                 self.media_filter = x
+
+        def set_phrase_blacklist_filter(self, x):
+                twelete.filter_phrase_black = True
+                for a in x:
+                        self.phrase_list_black.append(a)
+
+        def set_phrase_whitelist_filter(self, x):
+                twelete.filter_phrase_white = True
+                for a in x:
+                        self.phrase_list_white.append(a)
+                
+        def set_keybase_twitter(self,x):
+                a = "Verifying myself: I am " + x + " on http://Keybase.io ."
+                self.set_phrase_whitelist_filter([a])
+                
+
+
+
 
         # Error handler
         #----------------------------------------------------------------------------
@@ -178,7 +195,7 @@ class twelete:
                                         break
                                 else:
                                         filter_list.append(response)
-                        self.set_phrase_filter(filter_list)
+                        self.set_phrase_blacklist_filter(filter_list)
                         
                 if self.get_query("Filter based on media contents (Y/N):"):
                         while True:
@@ -270,7 +287,6 @@ class twelete:
         # ---------------------------------------------------------------------------
         def check_date(self, tweet):
                 # check date boundaries of status
-
                 if self.filter_date:
                         tweet_date = dateutil.parser.parse(tweet['created_at'])
                         if tweet_date < self.date_min:
@@ -282,47 +298,53 @@ class twelete:
         def check_activity(self):
                 # check activity boundaries of status
                 # [NOTE]: favorites mean the same as likes, just twitter legacy.
-
                 if self.filter_activity:
                         if self.status.retweet_count >= self.rt_min:
                                 return True
                         if self.status.favorite_count >= self.like_min:
                                 return True
                 return False
+        
+        def check_media(self, tweet):
+                # check if status contains media
+                if self.filter_media:
+                        if tweet['entities']['media'] != []:
+                                return self.media_filter
+                        else:
+                                return not self.media_filter
+                return False
 
-        def check_phrase(self, tweet):
+        def check_phrase_black(self, tweet):
+                # check if status contains blacklisted phrase
                 text =  tweet['text']       
-                if self.filter_phrase:
-                        for x in self.phrase_check:
+                if self.filter_phrase_black:
+                        for x in self.phrase_list_black:
                                 if x in text:
                                         self.log_notify("Found blacklisted phrase {}.".format(x))
                                         return False
                         return True
                 return False
-        
-        def check_media(self, tweet):
-                ## FUTURE FEATURE, not implemented yet.
-                if self.filter_media:
-                        print(tweet['media_url'])
-                        # True = delete with
-                        # False = delete without
-                        if self.media_filter == True:
-                                pass
-                                # Check if <HAS media>:
-                                #       return True
-                        if self.media_filter == False:
-                                pass
-                                # if not <HAS media>:
-                                #       return True
+
+        def check_phrase_white(self, tweet):
+                # check if status contains whitelisted phrase
+                text =  tweet['text']       
+                if self.filter_phrase_white:
+                        for x in self.phrase_check:
+                                if x in text:
+                                        self.log_notify("Found whitelisted phrase {}.".format(x))
+                                        return True
                 return False
 
+
+
+        
         # tweet deletion
         # ---------------------------------------------------------------------------
         def status_info(self, tweet):
                 try:
                         print(tweet['text'])
                 except UnicodeEncodeError:
-                        print("[ERROR]: unsupported unicode in tweet")
+                        log_warn("unprintable unicode in tweet")
 
         def fetch_status(self, tweet):
                 # try to fetch status from twitter
@@ -337,11 +359,10 @@ class twelete:
                 
         
         def commit_delete(self, tweet):
-                print("Deleting..")
                 while True:
                         try:
                                 #self.api.destroy_status(tweet['id'])
-                                self.log_notify("Deleted tweet")
+                                self.log_notify("Deleted tweet " + str(tweet['id']))
                                 break
                         except tweepy.TweepError as e:
                                  if not self.err_tweepy(e):
@@ -353,17 +374,19 @@ class twelete:
                 for file_name in self.file_list:
                         data = self.read_file(file_name)
                         for tweet in data:
+                                print(self.check_media(tweet))
                                 if self.check_date(tweet):
                                         continue
                                 if self.fetch_status(tweet):
                                         continue
                                 if self.check_activity():
                                         continue
-                                if self.check_phrase(tweet):
-                                        continue
                                 if self.check_media(tweet):
                                         continue
-
+                                if self.check_phrase_black(tweet):
+                                        continue
+                                if self.check_phrase_white(tweet):
+                                        continue
                                 
                                 self.status_info(tweet)
                                 self.commit_delete(tweet)
@@ -386,28 +409,35 @@ class twelete:
                 else:
                         self.log_notify("No tweets deleted. Exiting...")
                 sys.exit()
-
-        def __init__(self):
                 
+        def __init__(self):
+                # date filters
                 self.date_min = int()
                 self.date_max = int()
-                
+
+                # activity filters
                 self.rt_min = int()
                 self.like_min = int()
 
-                self.phrase_check = []
-
-                # True = delete with
-                # False = delete without
+                # media filter
+                # True = delete with | False = delete without
                 self.media_filter = bool()
-                
+
+                # tweet phrase filters
+                self.phrase_list_black = []
+                self.phrase_list_white = []
+
+
+                # directory of twitter archive
                 self.archive_dir = ""
-                
+
+                # api keys
                 self.api_key ="XXXXXXXXX"
                 self.api_key_secret = "XXXXXXXXX"   
                 self.access_token = "XXXXXXXXX"    
                 self.access_token_secret = "XXXXXXXXX"
 
+                #log files
                 self.notify_log_file = "./twelete.log"
                 self.warn_log_file = "./twelete.log"
                 self.err_log_file = "./twelete.log"
