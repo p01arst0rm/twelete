@@ -224,20 +224,20 @@ class twelete:
                         filter_list = []
                         while True:
                                 response = self.get_string("enter string to filter by; Press enter to finish entering.", False)
-                                if response == False:
-                                        break
-                                else:
+                                if response:
                                         filter_list.append(response)
+                                else:
+                                        break
                         self.set_phrase_blacklist_filter(filter_list)
 
                 if self.get_query("whitelist phrases in text? (Y/N):"):
                         filter_list = []
                         while True:
                                 response = self.get_string("enter string to filter by; Press enter to finish entering.", False)
-                                if response == False:
-                                        break
+                                if response:
+                                        filter_list.append(response) 
                                 else:
-                                        filter_list.append(response)
+                                        break
                         self.set_phrase_whitelist_filter(filter_list)
                         
                 if self.get_query("preserve keybase proof? (Y/N):"):
