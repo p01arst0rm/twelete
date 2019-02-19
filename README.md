@@ -3,7 +3,7 @@ Twelete
 
 Twitter status removal tool for python 3.7. This tool is a heavily 
 modified version of a tool by sjtrny. Original is available 
-[here](https://github.com/sjtrny/TweetDelete/blob/master/delete_tweets.py).
+[here](https://github.com/sjtrny/TweetDelete/).
 
 Dependencies
 -----------
