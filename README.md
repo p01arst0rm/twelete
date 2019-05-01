@@ -20,7 +20,7 @@ Dependencies
 User Guide
 -----------
 
-1. Download your [Twitter archive](https://twitter.com/settings/account)
+- Download your [Twitter archive](https://twitter.com/settings/account)
 - Install dependencies
 	- `pip install git+https://github.com/tweepy/tweepy.git`
 	- `pip install glob3`
@@ -29,6 +29,6 @@ User Guide
 - Create a new twitter app
 - Set app permissions to read and write
 - Generate access token for your app
-- clone repository
-- execute run_interactive.py
-- follow instructions given
+- Clone repository
+- Execute run_interactive.py
+- Follow instructions given
